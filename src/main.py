@@ -10,8 +10,10 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from settings import bot_settings
+from settings import bot_settings, postgres_settings
+from models import Base
 
 
 dp = Dispatcher()
@@ -67,8 +69,15 @@ async def echo_handler(message: Message) -> None:
         await message.answer("Nice try!")
 
 
+async def create_table() -> None:
+    engine = create_async_engine(postgres_settings.url, echo=True)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
 async def main() -> None:
     bot = Bot(token=bot_settings.TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    await create_table()
     await dp.start_polling(bot)
 
 
