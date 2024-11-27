@@ -6,3 +6,10 @@ services:
     build: ./src
     env_file:
       - .env
+
+  postgresql:
+    image: postgres:17.2
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
