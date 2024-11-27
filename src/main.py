@@ -10,10 +10,9 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from sqlalchemy.ext.asyncio import create_async_engine
 
-from settings import bot_settings, postgres_settings
-from models import Base
+from settings import bot_settings
+from database import create_table, add_word
 
 
 dp = Dispatcher()
@@ -47,17 +46,18 @@ async def process_word_name(message: Message, state: FSMContext) -> None:
     await message.answer("And what is translation of that word?")
 
 
-async def process_state(state: FSMContext) -> None:
+async def process_state(state: FSMContext) -> list:
     data = await state.get_data()
-    data_string = [str(element) for element in data.values()]
-    print(data_string)
+    data = [str(element) for element in data.values()]
     await state.clear()
+    return data
 
 
 @dp.message(NewWordForm.translation)
 async def process_word_translation(message: Message, state: FSMContext) -> None:
     await state.update_data(tranlation=message.text)
-    await process_state(state)
+    word, translation = await process_state(state)
+    await add_word(str(message.from_user.id), word, translation)
     await message.answer("New word successfully added")
 
 
@@ -67,12 +67,6 @@ async def echo_handler(message: Message) -> None:
         await message.send_copy(chat_id=message.chat.id)
     except TypeError:
         await message.answer("Nice try!")
-
-
-async def create_table() -> None:
-    engine = create_async_engine(postgres_settings.url, echo=True)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
 
 async def main() -> None:
