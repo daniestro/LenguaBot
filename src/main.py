@@ -13,6 +13,7 @@ from aiogram.fsm.context import FSMContext
 
 from settings import bot_settings
 from database import create_table, add_word
+from rabbit_queue import create_queue, add_to_queue
 
 
 dp = Dispatcher()
@@ -57,7 +58,8 @@ async def process_state(state: FSMContext) -> list:
 async def process_word_translation(message: Message, state: FSMContext) -> None:
     await state.update_data(tranlation=message.text)
     word, translation = await process_state(state)
-    await add_word(str(message.from_user.id), word, translation)
+    word_in_db = await add_word(str(message.from_user.id), word, translation)
+    await add_to_queue(f"{word_in_db.id} {word}")
     await message.answer("New word successfully added")
 
 
@@ -72,6 +74,7 @@ async def echo_handler(message: Message) -> None:
 async def main() -> None:
     bot = Bot(token=bot_settings.TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     await create_table()
+    await create_queue()
     await dp.start_polling(bot)
 
 
