@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import json
 
 from aiogram import Bot, Dispatcher, html, F
 from aiogram.client.default import DefaultBotProperties
@@ -59,7 +60,16 @@ async def process_word_translation(message: Message, state: FSMContext) -> None:
     await state.update_data(tranlation=message.text)
     word, translation = await process_state(state)
     word_in_db = await add_word(str(message.from_user.id), word, translation)
-    await add_to_queue(f"{word_in_db.id} {word}")
+    await add_to_queue(
+        json.dumps(
+            {
+                'word_id': word_in_db.id,
+                'word': word,
+                'translation': translation,
+                'chat_id': message.chat.id
+            }
+        )
+    )
     await message.answer("New word successfully added")
 
 
