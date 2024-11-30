@@ -22,5 +22,22 @@ class PostgresFullSettings(BaseModel):
     url: str = f"{postgres.DRIVER}://{postgres.USER}:{postgres.PASSWORD}@{postgres.HOST}:{postgres.PORT}/{postgres.DB}"
 
 
+class RabbitSettings(BaseSettings):
+    HOST: str = "rabbitmq"
+    PORT: str = "5672"
+    USER: str
+    PASSWORD: str
+    DRIVER: str = "ampq"
+    QUEUE_NAME: str = "words_queue"
+    ROUTING_KEY: str = "words_queue"
+    model_config = SettingsConfigDict(env_prefix='RABBITMQ_')
+
+
+class RabbitFullSettings(BaseModel):
+    rabbit: RabbitSettings = RabbitSettings()
+    url: str = f"{rabbit.DRIVER}://{rabbit.USER}:{rabbit.PASSWORD}@{rabbit.HOST}:{rabbit.PORT}/"
+
+
 bot_settings = BotSettings()
 postgres_settings = PostgresFullSettings()
+rabbit_settings = RabbitFullSettings()
