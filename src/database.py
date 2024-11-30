@@ -13,8 +13,9 @@ async def create_table() -> None:
         await connection.run_sync(Base.metadata.create_all)
 
 
-async def add_word(user_id: str, word: str, translation: str) -> None:
+async def add_word(user_id: str, word: str, translation: str) -> UnknownWords:
     async with async_session_maker() as session:
         new_unknown_word = UnknownWords(user_id=user_id, word=word, translation=translation)
         session.add(new_unknown_word)
         await session.commit()
+        return new_unknown_word
