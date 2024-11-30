@@ -21,11 +21,11 @@ async def create_queue() -> None:
     await queue.bind(exchange, routing_key=rabbit_settings.rabbit.ROUTING_KEY)
 
 
-async def add_to_queue(word: str) -> None:
+async def add_to_queue(data: str) -> None:
     connection, channel, exchange = await get_connection_data()
     await exchange.publish(
         Message(
-            bytes(word, ENCODING),
+            bytes(data, ENCODING),
             content_type=CONTENT_TYPE,
             headers={'foo': 'bar'}
         ),
