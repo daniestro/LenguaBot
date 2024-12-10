@@ -13,7 +13,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 from settings import bot_settings
-from database import create_table, add_word
+from database import create_table, add_word, is_user_exist, add_user, update_user_name
 from rabbit_queue import create_queue, add_to_queue
 
 
@@ -27,12 +27,28 @@ class NewWordForm(StatesGroup):
     translation = State()
 
 
+class NewUsernameForm(StatesGroup):
+    name = State()
+
+
 @dp.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
+async def command_start_handler(message: Message, state: FSMContext) -> None:
     await message.answer(
         text=f"Hello, {html.bold(message.from_user.full_name)}!",
         reply_markup=start_reply_keyboard.as_markup()
     )
+    await asyncio.sleep(1)
+    if not await is_user_exist(message.from_user.id):
+        await add_user(message.from_user.id, message.from_user.full_name)
+        await state.set_state(NewUsernameForm.name)
+        await message.answer("What should I call you?")
+
+
+@dp.message(NewUsernameForm.name)
+async def process_new_username(message: Message, state: FSMContext) -> None:
+    await state.update_data(name=message.text)
+    await update_user_name(message.from_user.id, message.text)
+    await message.answer(f"Alright, I’ll call you {html.bold(message.text)}")
 
 
 @dp.message(F.text == "Add new word")
