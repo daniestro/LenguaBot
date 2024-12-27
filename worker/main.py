@@ -18,7 +18,8 @@ async def processing_messages_task() -> None:
             message = await get_message_from_queue()
             encoded_message = json.loads(message.body)
             logger.info(f"Message received: {encoded_message}?")
-            await send_message(encoded_message)
+            response = await send_message(encoded_message)
+            logger.info(response)
         except QueueEmpty:
             logger.info('Queue is empty')
             await asyncio.sleep(15)
