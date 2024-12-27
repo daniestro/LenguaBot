@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import sys
-import json
 
 from aiogram import Bot, Dispatcher, html, F
 from aiogram.client.default import DefaultBotProperties
@@ -13,8 +12,11 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 from settings import bot_settings
-from database import create_table, add_word, is_user_exist, add_user, update_user_name
-from rabbit_queue import create_queue, add_to_queue
+from database import create_table, add_word, is_user_exist, add_user, update_user_name, get_task_or_none
+from rabbit_queue import create_queue
+from task import Task
+from dialogs import Dialogs
+from models import Tasks
 
 
 dp = Dispatcher()
@@ -47,6 +49,7 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
 @dp.message(NewUsernameForm.name)
 async def process_new_username(message: Message, state: FSMContext) -> None:
     await state.update_data(name=message.text)
+    await state.clear()
     await update_user_name(message.from_user.id, message.text)
     await message.answer(f"Alright, I’ll call you {html.bold(message.text)}")
 
@@ -76,17 +79,23 @@ async def process_word_translation(message: Message, state: FSMContext) -> None:
     await state.update_data(tranlation=message.text)
     word, translation = await process_state(state)
     word_in_db = await add_word(str(message.from_user.id), word, translation)
-    await add_to_queue(
-        json.dumps(
-            {
-                'word_id': word_in_db.id,
-                'word': word,
-                'translation': translation,
-                'chat_id': message.chat.id
-            }
-        )
-    )
+    question = Dialogs.task_question.format(html.bold(word))
+    task = Task(message.from_user.id, word_in_db.id, message.chat.id, question)
+    await task.create()
     await message.answer("New word successfully added")
+
+
+def handle_answer(task: Tasks, message: str) -> str:
+    translation = task.word.translation
+    right_answer = "It's correct"
+    wrong_answer = "You are down"
+    return right_answer if translation == message else wrong_answer
+
+
+@dp.message(F.reply_to_message)
+async def handle_task(message: Message):
+    task = await get_task_or_none(message.reply_to_message.text)
+    await message.reply(handle_answer(task, message.text))
 
 
 @dp.message()
