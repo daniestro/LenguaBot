@@ -38,6 +38,13 @@ class UserService:
         query = select(Users).options(selectinload(Users.roles)).where(Users.id == _id)
         return await self._execute(query)
 
+    async def get_all(self, page: int, page_size: int) -> Users:
+        offset = (page - 1) * page_size
+        query = select(Users).offset(offset).limit(page_size)
+        result = await self.session.execute(query)
+        users = result.scalars().all()
+        return users
+
     async def _execute(self, query):
         response = await self.session.execute(query)
         user = response.scalar_one_or_none()

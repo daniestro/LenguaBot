@@ -1,7 +1,7 @@
 from uuid import UUID
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,3 +27,12 @@ async def add_role_to_user(
     await session.commit()
     await session.refresh(user)
     return JSONResponse(status_code=HTTPStatus.CREATED, content={"detail": "Role to user added successfully."})
+
+
+@router.get("/users/")
+async def get_users(
+        page: int = Query(1, ge=1),
+        page_size: int = Query(10, ge=1, le=100),
+        user_service: UserService = Depends(get_user_service)
+):
+    return await user_service.get_all(page, page_size)
