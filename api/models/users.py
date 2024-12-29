@@ -1,11 +1,9 @@
 from uuid import uuid4
 
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, UUID
 
-
-class Base(DeclarativeBase):
-    pass
+from .base import Base
 
 
 class Users(Base):
