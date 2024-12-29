@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from exceptions.base import HTTPException
 from connectors.database import create_table
-from routers import auth
+from routers import auth, roles, users
 
 
 app = FastAPI()
@@ -26,4 +26,5 @@ async def unicorn_exception_handler(
 
 
 app.include_router(auth.router)
-
+app.include_router(roles.router)
+app.include_router(users.router)

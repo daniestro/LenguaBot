@@ -1,8 +1,10 @@
 from typing import Optional
+from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from connectors.database import get_session
 from models import Users
@@ -30,6 +32,10 @@ class UserService:
 
     async def get_by(self, login: str) -> Optional[Users]:
         query = select(Users).where(Users.login == login)
+        return await self._execute(query)
+
+    async def get(self, _id: UUID):
+        query = select(Users).options(selectinload(Users.roles)).where(Users.id == _id)
         return await self._execute(query)
 
     async def _execute(self, query):
