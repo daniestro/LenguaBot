@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from exceptions.base import HTTPException
-from database import create_table
+from connectors.database import create_table
 from routers import auth
 
 
