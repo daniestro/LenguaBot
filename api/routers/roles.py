@@ -5,12 +5,14 @@ from fastapi.responses import JSONResponse
 
 from schemas import RoleCreateSchema
 from services import RolesService, get_roles_service
+from services import JWTBearer
+from helpers import has_role
 
 
 router = APIRouter(tags=["roles"])
 
 
-@router.post('/roles/')
+@router.post('/roles/', dependencies=[Depends(has_role("admin"))])
 async def create_role(
         role_schema: RoleCreateSchema,
         role_service: RolesService = Depends(get_roles_service)
@@ -19,7 +21,7 @@ async def create_role(
     return JSONResponse(status_code=HTTPStatus.CREATED, content={"detail": "Successfully created"})
 
 
-@router.get("/roles/")
+@router.get("/roles/", dependencies=[Depends(JWTBearer())])
 async def get_roles(
         page: int = Query(1, ge=1),
         page_size: int = Query(10, ge=1, le=100),
