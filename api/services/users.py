@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import Depends
@@ -34,11 +34,11 @@ class UserService:
         query = select(Users).where(Users.login == login)
         return await self._execute(query)
 
-    async def get(self, _id: UUID):
+    async def get(self, _id: UUID | str):
         query = select(Users).options(selectinload(Users.roles)).where(Users.id == _id)
         return await self._execute(query)
 
-    async def get_all(self, page: int, page_size: int) -> Users:
+    async def get_all(self, page: int, page_size: int) -> Sequence[Users]:
         offset = (page - 1) * page_size
         query = select(Users).offset(offset).limit(page_size)
         result = await self.session.execute(query)

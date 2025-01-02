@@ -27,3 +27,8 @@ class UserLoginSchema(BaseModel):
                 "password": "weakpassword"
             }
         }
+
+
+class UserDataSchema(BaseModel):
+    user_id: str
+    expires: float

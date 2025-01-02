@@ -1,5 +1,6 @@
 from time import time
 from typing import Optional
+from uuid import UUID
 
 import jwt
 from jwt.exceptions import PyJWTError
@@ -22,7 +23,8 @@ class JWTService:
         self.secret = jwt_stg.SECRET
         self.algorithm = jwt_stg.ALGORITHM
 
-    def sign(self, user_id: str) -> str:
+    def sign(self, user_id: str | UUID) -> str:
+        user_id = str(user_id)
         payload = self._create_payload(user_id)
         token = self._encode(payload)
         return self._response(token) # noqa: stupid linter
