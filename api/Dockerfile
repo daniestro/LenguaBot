@@ -1,4 +1,5 @@
 FROM python:3.13
+WORKDIR app
 COPY . .
 RUN pip install -r requirements.txt
-CMD ["fastapi", "run", "main.py"]
+CMD alembic upgrade head && fastapi run main.py

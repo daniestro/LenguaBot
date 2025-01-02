@@ -14,13 +14,15 @@ class PostgresqlSettings(BaseSettings):
     PASSWORD: str
     HOST: str = "postgresql"
     PORT: str = "5432"
-    DRIVER: str = "postgresql+asyncpg"
+    ASYNC_DRIVER: str = "postgresql+asyncpg"
+    SYNC_DRIVER: str = "postgresql"
     model_config = SettingsConfigDict(env_prefix='POSTGRES_')
 
 
 class PostgresFullSettings(BaseModel):
     postgres: PostgresqlSettings = PostgresqlSettings()
-    url: str = f"{postgres.DRIVER}://{postgres.USER}:{postgres.PASSWORD}@{postgres.HOST}:{postgres.PORT}/{postgres.DB}"
+    async_url: str = f"{postgres.ASYNC_DRIVER}://{postgres.USER}:{postgres.PASSWORD}@{postgres.HOST}:{postgres.PORT}/{postgres.DB}"
+    sync_url: str = f"{postgres.SYNC_DRIVER}://{postgres.USER}:{postgres.PASSWORD}@{postgres.HOST}:{postgres.PORT}/{postgres.DB}"
 
 
 jwt_settings = JWTSettings()
