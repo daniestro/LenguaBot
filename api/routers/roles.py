@@ -17,7 +17,7 @@ async def create_role(
         role_schema: RoleCreateSchema,
         role_service: RolesService = Depends(get_roles_service)
 ):
-    await role_service.create(role_schema.name)
+    await role_service.add(name=role_schema.name)
     return JSONResponse(status_code=HTTPStatus.CREATED, content={"detail": "Successfully created"})
 
 
@@ -27,4 +27,4 @@ async def get_roles(
         page_size: int = Query(10, ge=1, le=100),
         role_service: RolesService = Depends(get_roles_service)
 ):
-    return await role_service.get_all(page, page_size)
+    return await role_service.all(page, page_size)

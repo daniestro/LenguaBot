@@ -23,7 +23,7 @@ def has_role(*requires_roles) -> callable:
             user_data: UserDataSchema = Depends(get_current_user_data),
             user_service: UserService = Depends(get_user_service)
     ):
-        user = await user_service.get(user_data.user_id)
+        user = await user_service.get(id=user_data.user_id)
         user_roles_names = [role.name for role in user.roles]
 
         if not any(role in user_roles_names for role in requires_roles):

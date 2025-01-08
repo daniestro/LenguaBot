@@ -22,8 +22,8 @@ async def add_role_to_user(
         user_service: UserService = Depends(get_user_service),
         roles_service: RolesService = Depends(get_roles_service)
 ):
-    user = await user_service.get(user_id)
-    role = await roles_service.get(role_id)
+    user = await user_service.get(id=user_id)
+    role = await roles_service.get(id=role_id)
     user.roles.append(role)
     session.add(user)
     await session.commit()
@@ -37,4 +37,4 @@ async def get_users(
         page_size: int = Query(10, ge=1, le=100),
         user_service: UserService = Depends(get_user_service)
 ):
-    return await user_service.get_all(page, page_size)
+    return await user_service.all(page, page_size)
