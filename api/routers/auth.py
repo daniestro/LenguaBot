@@ -17,9 +17,9 @@ async def create_user(
         user_form: UserSchema = Body(...)
 ):
     user = await user_service.create(
-        user_form.fullname,
-        user_form.login,
-        user_form.password
+        fullname=user_form.fullname,
+        login=user_form.login,
+        password=user_form.password
     )
     if user:
         return jwt_service.sign(user.id)
@@ -32,7 +32,7 @@ async def user_login(
         jwt_service: JWTService = Depends(get_jwt_service),
         user_form: UserLoginSchema = Body(...)
 ):
-    user = await user_service.get_by(user_form.login)
+    user = await user_service.get(login=user_form.login)
     if user and user.password == user_form.password:
         return jwt_service.sign(user.id)
     raise WrongLoginDetailsException
