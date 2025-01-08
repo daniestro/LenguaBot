@@ -24,3 +24,13 @@ services:
     build: worker
     env_file:
       - .env
+
+  api:
+    build: api
+    ports:
+      - "8000:8000"
+      - "80:80"
+    volumes:
+      - ./api/alembic/versions:/app/alembic/versions
+    env_file:
+      - .env
