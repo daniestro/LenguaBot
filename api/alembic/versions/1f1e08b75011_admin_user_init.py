@@ -35,8 +35,8 @@ def upgrade():
     )
 
     # Insert the admin role
-    op.bulk_insert(roles_table, [{"id": 1, "name": "admin"}])
-    op.bulk_insert(roles_table, [{"id": 2, "name": "stuff"}])
+    op.bulk_insert(roles_table, [{"name": "admin"}])
+    op.bulk_insert(roles_table, [{"name": "stuff"}])
 
     # Define the users table
     users_table = sa.table(
