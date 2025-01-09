@@ -21,13 +21,14 @@ class BaseService:
     async def _get(self, option=None, **kwargs):
         attr, value = next(iter(kwargs.items()))
         matching = getattr(self.model, attr) == value
-        if option:
-            query = select(self.model).options(option).where(matching)
-        else:
-            query = select(self.model).where(matching)
+        query = self._build_query(option, matching)
         response = await self.session.execute(query)
         instance = response.scalar_one_or_none()
         return instance
+
+    def _build_query(self, option, matching):
+        query = select(self.model).where(matching)
+        return query.options(option) if option else query
 
     async def _all(self, page: int, page_size: int):
         offset = (page - 1) * page_size
@@ -37,13 +38,23 @@ class BaseService:
         return instances
 
 
-class OpenBaseService(BaseService):
+class GetIntf:
+    async def get(self, option, **kwargs):
+        return await self._get(option, **kwargs)
 
+
+class AddIntf:
     async def add(self, **kwargs):
         return await self._add(**kwargs)
 
-    async def get(self, **kwargs):
-        return await self._get(**kwargs)
 
+class AllIntf:
     async def all(self, *args):
-        return await self._all(*args)
+        return await self._all(args)
+
+
+class Interfaces:
+    Get = GetIntf
+    Add = AddIntf
+    All = AllIntf
+
